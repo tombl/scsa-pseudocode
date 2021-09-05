@@ -1,0 +1,40 @@
+{
+  "name": "scsa",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/index.ts --outdir=dist --sourcemap --platform=node --bundle --format=esm --external:ansi-styles",
+    "build:watch": "esbuild src/index.ts --outdir=dist --sourcemap --platform=node --bundle --format=esm --external:ansi-styles --watch",
+    "test": "node --experimental-vm-modules --no-warnings node_modules/.bin/jest --coverage",
+    "test:watch": "node --experimental-vm-modules --no-warnings node_modules/.bin/jest --coverage --watch",
+    "types": "tsc -p tsconfig.declaration.json",
+    "types:watch": "tsc -w -p tsconfig.declaration.json"
+  },
+  "jest": {
+    "coverageReporters": [
+      "text"
+    ],
+    "globals": {
+      "ts-jest": {
+        "useESM": true
+      }
+    },
+    "preset": "ts-jest/presets/default-esm"
+  },
+  "dependencies": {
+    "ansi-styles": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.7.10",
+    "@typescript-eslint/eslint-plugin": "^4.30.0",
+    "@typescript-eslint/parser": "^4.30.0",
+    "esbuild": "^0.12.24",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jest": "^24.4.0",
+    "jest": "^27.1.0",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.2"
+  }
+}

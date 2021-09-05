@@ -1,0 +1,5 @@
+x <- 1+2
+Output(x)
+If true = true then
+    Output("hi") // this prints hi
+End If

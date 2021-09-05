@@ -1,0 +1,52 @@
+// comment
+
+Assignment <- Identifier
+Assignment <- Index.Static
+Assignment <- Index["Computed"]
+Assignment <- "String"
+Assignment <- 'Also string'
+Assignment <- 1234
+Assignment <- 1234.5678
+Assignment <- (Bracketed)
+Assignment <- 1 + 1
+Assignment <- Call()
+Assignment <- not UnaryOperator
+
+If true then
+    Output("If")
+End If
+
+If false then
+    Output("If true")
+Else
+    Output("If false")
+End If
+
+Case 1 of
+    = 1 : Output(1)
+    = 2 : Output(2)
+    >= 3 : Output(3)
+End Case
+
+For n <- 1 to 10
+    Output(n)
+End For
+
+While false
+    Output("While")
+End While
+
+Repeat
+    Output("While")
+Until false
+
+Module NoParams
+    Output("Hello from NoParams")
+End NoParams
+
+Module HasParams(x, y, z)
+    Output("Hello from HasParams")
+End HasParams
+
+NoParams()
+HasParams(1, 2, 3)

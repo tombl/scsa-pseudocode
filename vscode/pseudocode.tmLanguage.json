@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "SCSA Pseudocode",
+  "patterns": [
+    {
+      "name": "comment.line.double-slash",
+      "begin": "//",
+      "end": "\n"
+    },
+    {
+      "name": "string.quoted.double",
+      "begin": "\"",
+      "end": "\""
+    },
+    {
+      "name": "string.quoted.single",
+      "begin": "'",
+      "end": "'"
+    },
+    {
+      "match": "(?:^|[^A-Za-z])(?!and|or|not|End|If|then|Else|Case|of|For|While|Repeat|Until|to|Module)([A-Za-z]+)[ \\n]*\\(",
+      "captures": { "1": { "name": "entity.name.function" } }
+    },
+    {
+      "match": "(?:^|[^A-Za-z])(?!and|or|not|End|If|then|Else|Case|of|For|While|Repeat|Until|to|Module)([A-Za-z]+)",
+      "captures": { "1": { "name": "variable" } }
+    },
+    { "name": "constant.numeric.decimal", "match": "\\d+\\.\\d+" },
+    { "name": "constant.numeric", "match": "\\d+" },
+    {
+      "name": "keyword",
+      "match": "and|or|not|End|If|then|Else|Case|of|For|While|Repeat|Until|to|Module"
+    },
+    { "name": "keyword.operator.assignment", "match": "<-" },
+    {
+      "name": "keyword.operator.comparison",
+      "match": "!=|≠|="
+    },
+    {
+      "name": "keyword.operator.relational",
+      "match": "<=|⩽|<|>=|⩾|>"
+    },
+    {
+      "name": "keyword.operator.arithmetic",
+      "match": "\\+|-|/|÷|\\*|×"
+    }
+  ],
+  "scopeName": "source.scsa"
+}

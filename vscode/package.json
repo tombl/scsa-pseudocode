@@ -1,0 +1,35 @@
+{
+  "name": "scsa-pseudocode",
+  "displayName": "SCSA Pseudocode Support",
+  "description": "Adds language support for SCSA pseudocode",
+  "publisher": "tombl",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.58.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "scsa-pseudocode",
+        "aliases": [
+          "SCSA Pseudocode",
+          "scsa-pseudocode"
+        ],
+        "extensions": [
+          ".scsa"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "scsa-pseudocode",
+        "scopeName": "source.scsa",
+        "path": "./pseudocode.tmLanguage.json"
+      }
+    ]
+  }
+}
