@@ -9,6 +9,7 @@
     "lib": ["ESNext"],
     "module": "ESNext",
     "moduleResolution": "Node",
+    "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,

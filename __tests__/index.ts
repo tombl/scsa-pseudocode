@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import { compile, Interpreter, std } from "../src";
 
 async function execute(

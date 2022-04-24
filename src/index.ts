@@ -1,7 +1,7 @@
 import { Compiler, Program } from "./compiler";
 import { highlight } from "./highlighter";
-import { Lexer } from "./lexer";
-import { parseStatements } from "./parser";
+import { Lexer, Token } from "./lexer";
+import { parseStatements, Statement } from "./parser";
 import { Tokens } from "./parser/tokens";
 
 export type { Program };
@@ -11,6 +11,8 @@ export * as std from "./std";
 export * from "./errors";
 
 export function compile(code: string): {
+  tokens: Token[];
+  ast: Statement[];
   program: Program;
   highlightedCode: string;
 } {
@@ -21,5 +23,10 @@ export function compile(code: string): {
   ];
   const compiler = new Compiler();
   compiler.compile(parsed);
-  return { program: compiler.getProgram(), highlightedCode };
+  return {
+    tokens,
+    ast: parsed,
+    program: compiler.getProgram(),
+    highlightedCode,
+  };
 }

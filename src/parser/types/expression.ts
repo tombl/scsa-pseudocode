@@ -47,6 +47,7 @@ export interface BinaryOperatorExpression {
     | "minus"
     | "divide"
     | "multiply"
+    | "modulo"
     | "and"
     | "or"
     | "lt"

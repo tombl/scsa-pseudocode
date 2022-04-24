@@ -40,6 +40,7 @@ const BINARY_OPERATORS = {
   "-": "minus",
   "÷": "divide",
   "×": "multiply",
+  "%": "modulo",
   and: "and",
   or: "or",
   "<": "lt",

@@ -38,7 +38,7 @@ export interface BuiltinContext {
   length: number;
   array(): AllocatedValue[];
   get(index: number): AllocatedValue | undefined;
-  set(index: number, value: AllocatedValue): void;
+  set(index: number, value: Value): void;
   interpreter: Interpreter;
 }
 export type Builtin = (ctx: BuiltinContext) => Promise<void> | void;
@@ -54,8 +54,6 @@ export class Interpreter {
   readonly #highlightedCode: string;
   #builtins = new Map<number, Builtin>();
 
-  #true;
-  #false;
   constructor(
     program: Program,
     highlightedCode: string,
@@ -76,24 +74,12 @@ export class Interpreter {
     }
     for (const [name, value] of Object.entries({
       ...variables,
-      true: { type: "boolean", value: true },
-      false: { type: "boolean", value: false },
       null: { type: "null" },
     } as const)) {
       const variable = program.variableNames.indexOf(name);
       if (variable === -1) continue;
       this.#heap.set(variable, { ...value, id: variable });
     }
-    this.#true = this.#heap.get(
-      this.#program.variableNames.indexOf("true")
-    ) as AllocatedValue<BooleanValue>;
-    this.#false = this.#heap.get(
-      this.#program.variableNames.indexOf("false")
-    ) as AllocatedValue<BooleanValue>;
-  }
-
-  #boolean(value: boolean): AllocatedValue<BooleanValue> {
-    return value ? this.#true : this.#false;
   }
 
   #stack: AllocatedValue[] = [];
@@ -216,7 +202,9 @@ export class Interpreter {
         this.#stack.push(
           typeof value === "string"
             ? this.alloc({ type: "string", value })
-            : this.alloc({ type: "number", value })
+            : typeof value === "number"
+            ? this.alloc({ type: "number", value })
+            : this.alloc({ type: "boolean", value })
         );
         this.#pc.address++;
         break;
@@ -232,7 +220,7 @@ export class Interpreter {
           throw this.#makeError("Invalid left-hand side in assignment");
         }
 
-        this.#heap.set(target.id, value);
+        this.#heap.set(target.id, { ...value, id: target.id });
         this.#pc.address++;
         break;
       }
@@ -263,16 +251,15 @@ export class Interpreter {
               array: () => Array.from({ length }, (_, i) => get(i)!),
               get,
               set: (index, value) => {
-                const variable = this.#heap.get(
-                  this.#program.variableNames.indexOf(
-                    `module$${moduleName}$${index}`
-                  )
+                const variable = this.#program.variableNames.indexOf(
+                  `module$${moduleName}$${index}`
                 );
-                if (variable !== undefined) {
-                  this.#heap.set(variable.id, value);
-                  return true;
-                }
-                return false;
+                console.log(
+                  "set",
+                  this.#program.variableNames[variable],
+                  value
+                );
+                this.#heap.set(variable, { ...value, id: variable });
               },
               interpreter: this,
             });
@@ -346,7 +333,9 @@ export class Interpreter {
         if (boolean?.type !== "boolean") {
           throw this.#makeError("Expected boolean");
         }
-        this.#stack.push(this.#boolean(!boolean.value));
+        this.#stack.push(
+          this.alloc({ type: "boolean", value: !boolean.value })
+        );
         this.#pc.address++;
         break;
       }
@@ -363,9 +352,11 @@ export class Interpreter {
           (left.type === "number" && right.type === "number") ||
           (left.type === "boolean" && right.type === "boolean")
         ) {
-          this.#stack.push(this.#boolean(left.value === right.value));
+          this.#stack.push(
+            this.alloc({ type: "boolean", value: left.value === right.value })
+          );
         } else if (left.type === "null" && right.type === "null") {
-          this.#stack.push(this.#true);
+          this.#stack.push(this.alloc({ type: "boolean", value: true }));
         } else {
           throw this.#makeError(
             `Can't compare ${left.type} with ${right.type}`
@@ -428,6 +419,24 @@ export class Interpreter {
         this.#pc.address++;
         break;
       }
+      case "binary-operator-modulo": {
+        const right = this.#stack.pop();
+        const left = this.#stack.pop();
+
+        if (left?.type !== "number" || right?.type !== "number") {
+          throw this.#makeError(
+            `Can't modulo ${left?.type ?? "nothing"} with ${
+              right?.type ?? "nothing"
+            }`
+          );
+        }
+
+        this.#stack.push(
+          this.alloc({ type: "number", value: left.value % right.value })
+        );
+        this.#pc.address++;
+        break;
+      }
       case "binary-operator-divide": {
         const right = this.#stack.pop();
         const left = this.#stack.pop();
@@ -458,7 +467,9 @@ export class Interpreter {
           );
         }
 
-        this.#stack.push(this.#boolean(left.value && right.value));
+        this.#stack.push(
+          this.alloc({ type: "boolean", value: left.value && right.value })
+        );
         this.#pc.address++;
         break;
       }
@@ -474,7 +485,9 @@ export class Interpreter {
           );
         }
 
-        this.#stack.push(this.#boolean(left.value || right.value));
+        this.#stack.push(
+          this.alloc({ type: "boolean", value: left.value || right.value })
+        );
         this.#pc.address++;
         break;
       }
@@ -490,7 +503,9 @@ export class Interpreter {
           );
         }
 
-        this.#stack.push(this.#boolean(left.value < right.value));
+        this.#stack.push(
+          this.alloc({ type: "boolean", value: left.value < right.value })
+        );
         this.#pc.address++;
         break;
       }
@@ -506,7 +521,9 @@ export class Interpreter {
           );
         }
 
-        this.#stack.push(this.#boolean(left.value <= right.value));
+        this.#stack.push(
+          this.alloc({ type: "boolean", value: left.value <= right.value })
+        );
         this.#pc.address++;
         break;
       }
@@ -522,7 +539,9 @@ export class Interpreter {
           );
         }
 
-        this.#stack.push(this.#boolean(left.value > right.value));
+        this.#stack.push(
+          this.alloc({ type: "boolean", value: left.value > right.value })
+        );
         this.#pc.address++;
         break;
       }
@@ -538,7 +557,9 @@ export class Interpreter {
           );
         }
 
-        this.#stack.push(this.#boolean(left.value >= right.value));
+        this.#stack.push(
+          this.alloc({ type: "boolean", value: left.value >= right.value })
+        );
         this.#pc.address++;
         break;
       }

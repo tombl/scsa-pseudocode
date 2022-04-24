@@ -17,6 +17,7 @@ export type Instruction =
         | "plus"
         | "minus"
         | "multiply"
+        | "modulo"
         | "divide"
         | "equals"
         | "and"
@@ -28,7 +29,7 @@ export type Instruction =
     };
 
 export interface Program {
-  literals: Array<string | number>;
+  literals: Array<string | number | boolean>;
   modules: Map<number, Instruction[]>;
   moduleNames: string[];
   variableNames: string[];
@@ -48,12 +49,12 @@ class NumericAssigner<T> {
       }
     };
   }
-  get(name: T): number {
-    if (!this.#map.has(name)) {
-      this.#map.set(name, this.#map.size);
+  get(value: T): number {
+    if (!this.#map.has(value)) {
+      this.#map.set(value, this.#map.size);
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.#map.get(name)!;
+    return this.#map.get(value)!;
   }
   toArray(): T[] {
     const array = new Array<T>(this.#map.size);
@@ -65,7 +66,7 @@ class NumericAssigner<T> {
 }
 
 export class Compiler {
-  #literals = new NumericAssigner<string | number>();
+  #literals = new NumericAssigner<string | number | boolean>();
   #variables = new NumericAssigner<string>();
   #moduleIDs = new NumericAssigner<string>();
   #modules = new Map<number, Instruction[]>();
@@ -143,9 +144,9 @@ export class Compiler {
         break;
       }
       case "unary-operator": {
-        this.#compileExpression(module, expr.value);
         switch (expr.operator) {
           case "not": {
+            this.#compileExpression(module, expr.value);
             this.#push(module, { type: "not" });
             break;
           }
@@ -154,6 +155,7 @@ export class Compiler {
               type: "literal",
               literal: this.#literals.get(0),
             });
+            this.#compileExpression(module, expr.value);
             this.#push(module, { type: "binary-operator-minus" });
             break;
           }
@@ -161,10 +163,25 @@ export class Compiler {
         break;
       }
       case "identifier": {
-        this.#push(module, {
-          type: "read",
-          variable: this.#variables.get(expr.name),
-        });
+        switch (expr.name) {
+          case "true":
+            this.#push(module, {
+              type: "literal",
+              literal: this.#literals.get(true),
+            });
+            break;
+          case "false":
+            this.#push(module, {
+              type: "literal",
+              literal: this.#literals.get(false),
+            });
+            break;
+          default:
+            this.#push(module, {
+              type: "read",
+              variable: this.#variables.get(expr.name),
+            });
+        }
         break;
       }
     }

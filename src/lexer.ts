@@ -41,6 +41,7 @@ export interface Token {
     | "-"
     | "÷"
     | "×"
+    | "%"
     | "<"
     | "⩽"
     | ">"
@@ -140,6 +141,7 @@ export class Lexer {
       "÷",
       "*",
       "×",
+      "%",
       "and",
       "or",
       "not",

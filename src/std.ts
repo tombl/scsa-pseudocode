@@ -1,5 +1,5 @@
 import { createInterface } from "readline";
-import type { AllocatedValue, BuiltinContext, Value } from "./interpreter";
+import type { BuiltinContext, Value } from "./interpreter";
 
 async function input(ctx: BuiltinContext): Promise<void> {
   const rl = createInterface({
@@ -7,18 +7,17 @@ async function input(ctx: BuiltinContext): Promise<void> {
     output: process.stdout,
     terminal: false,
   });
-  let response: AllocatedValue = ctx.interpreter.alloc({
+  let response: Value = {
     type: "string",
     value: await new Promise<string>((resolve) =>
-      rl.question("Input:", resolve)
+      rl.question("Input: ", resolve)
     ),
-  });
+  };
   rl.close();
   if (/[0-9]+(?:\.[0-9]+)?/.test(response.value)) {
     response = {
       type: "number",
       value: parseFloat(response.value),
-      id: response.id,
     };
   }
   ctx.set(0, response);
@@ -48,3 +47,12 @@ function output(ctx: BuiltinContext): void {
   console.log(ctx.array().map(printValue).join(""));
 }
 export { output as Output, output as Write };
+
+async function sleep(ctx: BuiltinContext): Promise<void> {
+  const time = ctx.get(0);
+  if (time?.type !== "number") {
+    throw new TypeError("expected a number");
+  }
+  await new Promise((r) => setTimeout(r, time.value));
+}
+export { sleep as Delay, sleep as Sleep, sleep as Wait };
