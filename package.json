@@ -10,6 +10,7 @@
     "types": "tsc -p tsconfig.declaration.json",
     "types:watch": "tsc -w -p tsconfig.declaration.json"
   },
+  "bin": "./bin/scsa.js",
   "jest": {
     "coverageReporters": [
       "text"

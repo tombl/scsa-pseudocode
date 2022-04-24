@@ -1,4 +1,4 @@
-#!/bin/node --enable-source-maps
+#!/usr/bin/node --enable-source-maps
 import { readFile } from "fs/promises";
 import { compile, Interpreter, std } from "../dist/index.js";
 
