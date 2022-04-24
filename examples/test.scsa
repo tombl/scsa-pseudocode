@@ -37,8 +37,8 @@ While false
 End While
 
 Repeat
-    Output("While")
-Until false
+    Output("Repeat")
+Until true
 
 Module NoParams
     Output("Hello from NoParams")

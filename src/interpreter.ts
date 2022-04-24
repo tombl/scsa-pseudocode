@@ -137,14 +137,22 @@ export class Interpreter {
   #makeError(
     message: string,
     { bottom, annotation }: { bottom?: string; annotation?: string } = {}
-  ): ExecutionError {
+  ): Error {
     let position: Position | undefined = undefined;
-    if (this.#pc === null) {
-      throw new Error(message);
+    while (position === undefined && this.#pc !== null) {
+      position = this.#program.positions.get(
+        `${this.#pc.module}-${this.#pc.address--}`
+      );
+      if (this.#pc.address < 0) {
+        this.#callStack.pop();
+      }
     }
-    let { address } = this.#pc;
-    while (position === undefined && address >= 0) {
-      position = this.#program.positions.get(`${this.#pc.module}-${address--}`);
+    if (position === undefined) {
+      if (bottom !== undefined) {
+        message += "\n";
+        message += bottom;
+      }
+      return new Error(message);
     }
     return new ExecutionError(message, {
       code: this.#highlightedCode,
@@ -161,11 +169,7 @@ export class Interpreter {
     }
     const module = this.#program.modules.get(this.#pc.module);
     if (module === undefined) {
-      throw new ReferenceError(
-        `Module "${
-          this.#program.moduleNames[this.#pc.module] ?? this.#pc.module
-        }" not found`
-      );
+      throw this.#makeError("Module not found");
     }
     const instr = module[this.#pc.address];
     if (instr === undefined) {
@@ -186,7 +190,9 @@ export class Interpreter {
       case "branch": {
         const condition = this.#stack.pop();
         if (condition?.type !== "boolean") {
-          throw this.#makeError("Expected boolean");
+          throw this.#makeError("Expected boolean", {
+            annotation: `found ${condition?.type ?? "nothing"}`,
+          });
         }
 
         if (condition.value) {
@@ -311,7 +317,9 @@ export class Interpreter {
           } as AllocatedValue<ArrayValue>;
           this.#heap.set(subject.id, subject);
         } else if (index?.type !== "string" && index?.type !== "number") {
-          throw this.#makeError("Expected string or number");
+          throw this.#makeError("Expected string or number", {
+            annotation: `found ${index?.type ?? "nothing"}`,
+          });
         }
 
         if (!(index.value in subject.values)) {
@@ -331,7 +339,9 @@ export class Interpreter {
       case "not": {
         const boolean = this.#stack.pop();
         if (boolean?.type !== "boolean") {
-          throw this.#makeError("Expected boolean");
+          throw this.#makeError("Expected boolean", {
+            annotation: `found ${boolean?.type ?? "nothing"}`,
+          });
         }
         this.#stack.push(
           this.alloc({ type: "boolean", value: !boolean.value })
