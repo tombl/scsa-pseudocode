@@ -27,5 +27,5 @@ Objects with a negative ID are dynamically allocated. On occasion, when `Interpr
 ### stack frames
 All variables are global right now, and while technically all examples run fine, this is problematic. Function scopes should contain the variables they declare. I need to add stack frames to the interpreter so that variables can be local to functions.
 
-## operator precedence
+### operator precedence
 All binary operators are currently parsed left to right.
